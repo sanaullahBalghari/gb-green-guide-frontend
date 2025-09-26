@@ -1,0 +1,1721 @@
+import React, { useState, useEffect } from "react";
+import { AddEditForm } from "../components";
+import Loader from '../components/common/Loader';
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Utensils,
+  Package,
+  ShoppingBag,
+  Eye,
+  Check,
+  Clock,
+  Truck,
+  X,
+  User,
+  Calendar,
+  DollarSign,
+  AlertCircle
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import RestaurantCard from "../components/common/RestaurantCard";
+import ProductCard from "../components/ProductCard";
+import apiServer from "../utils/apiServer";
+import API_ROUTES from "../apiRoutes";
+
+const ProfilePage = () => {
+  const { user } = useAuth();
+  console.log("Profile page user =>", user);
+
+  const [activeTab, setActiveTab] = useState("restaurants");
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+
+  const [restaurants, setRestaurants] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
+
+  const userData = {
+    name: "",
+    email: "ahmad.khan@gbguide.com",
+    phone: "",
+    location: "Skardu, Baltistan",
+    joinDate: "January 2024",
+    userType: 'tourist',
+    stats: {
+      restaurants: "",
+      products: 12,
+      reviews: 45,
+      rating: 4.8
+    },
+  };
+
+  useEffect(() => {
+    if (user?.role === "business_owner") {
+      fetchMyRestaurants();
+      fetchMyProducts();
+      fetchMyOrders();
+    }
+  }, [user]);
+
+  const fetchMyRestaurants = async () => {
+    try {
+      setLoading(true);
+      const res = await apiServer(API_ROUTES.MY_RESTAURANTS, "GET");
+      if (!res.error) {
+        console.log("Fetched my restaurants:", res.data);
+        setRestaurants(res.data?.results || []);
+      } else {
+        console.error("Error fetching my restaurants:", res.message);
+        setRestaurants([]);
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setRestaurants([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMyProducts = async () => {
+    try {
+      setProductsLoading(true);
+      const res = await apiServer(API_ROUTES.MY_PRODUCTS, "GET");
+      if (!res.error) {
+        console.log("Fetched my products:", res.data);
+        setProducts(res.data.results || res.data);
+      } else {
+        console.error("Error fetching my products:", res.message);
+      }
+    } catch (err) {
+      console.error("Fetch products error:", err);
+    } finally {
+      setProductsLoading(false);
+    }
+  };
+
+  const fetchMyOrders = async () => {
+    try {
+      setOrdersLoading(true);
+      const res = await apiServer(API_ROUTES.SELLER_ORDERS, "GET");
+      if (!res.error) {
+        console.log("Fetched seller orders:", res.data);
+        setOrders(res.data.results || res.data || []);
+      } else {
+        console.error("Error fetching orders:", res.message);
+        setOrders([]);
+      }
+    } catch (err) {
+      console.error("Fetch orders error:", err);
+      setOrders([]);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      let endpoint;
+      let method = "POST";
+      
+      if (newStatus === "Confirmed") {
+        endpoint = API_ROUTES.ORDER_CONFIRM(orderId);
+      } else {
+        endpoint = API_ROUTES.ORDER_CONFIRM(orderId);
+      }
+
+      const res = await apiServer(endpoint, method, { status: newStatus });
+      
+      if (!res.error) {
+        setOrders(prevOrders =>
+          prevOrders.map(order =>
+            order.id === orderId
+              ? { ...order, status: newStatus }
+              : order
+          )
+        );
+        
+        if (selectedOrder?.id === orderId) {
+          setSelectedOrder({ ...selectedOrder, status: newStatus });
+        }
+        
+        alert(`Order #${orderId} status updated to ${newStatus}`);
+      } else {
+        alert(`Failed to update order status: ${res.message}`);
+      }
+    } catch (err) {
+      console.error("Update order status error:", err);
+      alert("Failed to update order status");
+    }
+  };
+
+  const handleDelete = async (type, id) => {
+    if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
+
+    try {
+      let response;
+
+      if (type === "restaurant") {
+        response = await apiServer(`${API_ROUTES.RESTAURANTS}${id}/`, "DELETE");
+        if (!response.error) {
+          setRestaurants(prev => prev.filter(r => r.id !== id));
+          alert("Restaurant deleted successfully!");
+        } else {
+          console.error("Delete restaurant failed:", response.message);
+          alert("Failed to delete restaurant: " + response.message);
+        }
+      } else if (type === "product") {
+        response = await apiServer(`${API_ROUTES.PRODUCTS}${id}/`, "DELETE");
+        if (!response.error) {
+          setProducts(prev => prev.filter(p => p.id !== id));
+          alert("Product deleted successfully!");
+        } else {
+          console.error("Delete product failed:", response.message);
+          alert("Failed to delete product: " + response.message);
+        }
+      }
+    } catch (error) {
+      console.error("Delete failed:", error);
+      alert("An error occurred while deleting");
+    }
+  };
+
+  const handleEdit = (type, item) => {
+    setEditingItem({ type, item });
+    setShowAddForm(true);
+  };
+
+  const handleAdd = (type) => {
+    setEditingItem({ type, item: null });
+    setShowAddForm(true);
+  };
+
+  const handleViewDetails = (item) => {
+    console.log(`View details for item: ${item.name}`);
+  };
+
+  const handleViewOrder = (order) => {
+    setSelectedOrder(order);
+    setShowOrderDetails(true);
+  };
+
+  const getStatusBadgeColor = (status) => {
+    const colors = {
+      'Pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'Confirmed': 'bg-blue-100 text-blue-800 border-blue-200',
+      'Shipped': 'bg-purple-100 text-purple-800 border-purple-200',
+      'Delivered': 'bg-green-100 text-green-800 border-green-200',
+      'Cancelled': 'bg-red-100 text-red-800 border-red-200'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
+  const getStatusIcon = (status) => {
+    const icons = {
+      'Pending': <Clock className="w-4 h-4" />,
+      'Confirmed': <Check className="w-4 h-4" />,
+      'Shipped': <Truck className="w-4 h-4" />,
+      'Delivered': <Check className="w-4 h-4" />,
+      'Cancelled': <X className="w-4 h-4" />
+    };
+    return icons[status] || <AlertCircle className="w-4 h-4" />;
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50">
+      {/* Hero Section */}
+      <section className="relative h-96 bg-gradient-to-r from-emerald-800 to-teal-800 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-30"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=600&fit=crop')",
+          }}
+        ></div>
+        <div className="absolute inset-0 bg-black/20"></div>
+
+        <div className="relative -mt-10 z-10 flex items-center justify-center h-full">
+          <div className="text-center text-white px-4 max-w-4xl">
+            <h1 className="text-6xl md:text-6xl font-bold mb-6">
+              WELCOME{" "}
+              <span className="bg-gradient-to-r from-emerald-300 to-teal-300 bg-clip-text text-transparent">
+                {user?.username?.toUpperCase()}
+              </span>
+            </h1>
+            <p className="text-xl md:text-xl text-gray-200 max-w-2xl mx-auto">
+              Manage your business, in one place.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Profile Card */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-36 relative z-20">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 md:p-12">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
+            <div className="relative flex-shrink-0">
+              <div className="w-32 h-32 rounded-full flex items-center justify-center bg-emerald-500 ring-4 ring-emerald-500 ring-offset-4 ring-offset-white text-white font-bold text-5xl">
+                {user?.username?.charAt(0)?.toUpperCase()}
+              </div>
+            </div>
+
+            <div className="flex-1 text-center lg:text-left">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
+                <div>
+                  <h2 className="text-3xl font-bold text-slate-900 mb-2">
+                    {user?.username}
+                  </h2>
+                  <div className="flex items-center justify-center lg:justify-start space-x-2 mb-2">
+                    <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-semibold">
+                      {user?.role}
+                    </span>
+                  </div>
+                </div>
+                <button className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200">
+                  Edit Profile
+                </button>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-6 text-slate-600 mb-6">
+                <div className="flex items-center justify-center lg:justify-start space-x-2">
+                  <Mail className="h-4 w-4 text-emerald-600" />
+                  <span>{user?.email}</span>
+                </div>
+                <div className="flex items-center justify-center lg:justify-start space-x-2">
+                  <Phone className="h-4 w-4 text-emerald-600" />
+                  <span>{user?.phone || "N/A"}</span>
+                </div>
+                <div className="flex items-center justify-center lg:justify-start space-x-2">
+                  <MapPin className="h-4 w-4 text-emerald-600" />
+                  <span>Skardu, Baltistan</span>
+                </div>
+              </div>
+
+              {user?.role === "business_owner" && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-xl text-center border border-emerald-100">
+                    <div className="text-2xl font-bold text-emerald-600">{restaurants.length}</div>
+                    <div className="text-sm text-slate-600 font-medium">Restaurants</div>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl text-center border border-blue-100">
+                    <div className="text-2xl font-bold text-blue-600">{products.length}</div>
+                    <div className="text-sm text-slate-600 font-medium">Products</div>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl text-center border border-purple-100">
+                    <div className="text-2xl font-bold text-purple-600">{orders.length}</div>
+                    <div className="text-sm text-slate-600 font-medium">Orders</div>
+                  </div>
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-4 rounded-xl text-center border border-amber-100">
+                    <div className="text-2xl font-bold text-amber-600">{userData.stats.rating}</div>
+                    <div className="text-sm text-slate-600 font-medium">Rating</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      {user?.role === "business_owner" && (
+        <>
+          <section className="bg-white/90 backdrop-blur-sm border-t shadow-sm sticky top-0 z-40">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex space-x-8">
+                <button
+                  onClick={() => setActiveTab("restaurants")}
+                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-semibold transition-all duration-200 ${
+                    activeTab === "restaurants"
+                      ? "border-emerald-500 text-emerald-600"
+                      : "border-transparent text-slate-600 hover:text-emerald-600 hover:border-emerald-200"
+                  }`}
+                >
+                  <Utensils className="h-5 w-5" />
+                  <span>My Restaurants ({restaurants.length})</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("products")}
+                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-semibold transition-all duration-200 ${
+                    activeTab === "products"
+                      ? "border-emerald-500 text-emerald-600"
+                      : "border-transparent text-slate-600 hover:text-emerald-600 hover:border-emerald-200"
+                  }`}
+                >
+                  <Package className="h-5 w-5" />
+                  <span>My Products ({products.length})</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("orders")}
+                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-semibold transition-all duration-200 ${
+                    activeTab === "orders"
+                      ? "border-emerald-500 text-emerald-600"
+                      : "border-transparent text-slate-600 hover:text-emerald-600 hover:border-emerald-200"
+                  }`}
+                >
+                  <ShoppingBag className="h-5 w-5" />
+                  <span>Orders ({orders.length})</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section className="py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              {/* Restaurants Tab */}
+              {activeTab === "restaurants" && (
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+                    <h2 className="text-3xl font-bold text-slate-900 mb-4 sm:mb-0">
+                      My Restaurants
+                    </h2>
+                    <button
+                      onClick={() => handleAdd("restaurant")}
+                      className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span>Add Restaurant</span>
+                    </button>
+                  </div>
+
+                  {loading ? (
+                    <div className="text-center py-12">
+                      <div className="mx-auto flex py-16">
+                        <Loader />
+                      </div>
+                      <p className="text-slate-500 mt-4">Loading restaurants...</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {restaurants.map((restaurant) => (
+                        <RestaurantCard
+                          key={restaurant.id}
+                          restaurant={{
+                            id: restaurant.id,
+                            name: restaurant.name,
+                            type: restaurant.restaurant_type,
+                            location: restaurant.location_inside_city,
+                            status: restaurant.is_active ? "Active" : "Not Active",
+                            roomsAvailable: restaurant.room_available,
+                            description: restaurant.description,
+                            images: restaurant.image ? [restaurant.image] : [
+                              "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop"
+                            ]
+                          }}
+                          showActions={true}
+                          onEdit={() => handleEdit("restaurant", restaurant)}
+                          onDelete={() => handleDelete("restaurant", restaurant.id)}
+                          onViewDetails={() => handleViewDetails(restaurant)}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {restaurants.length === 0 && !loading && (
+                    <div className="text-center py-16">
+                      <Utensils className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-slate-600 mb-2">No restaurants yet</h3>
+                      <p className="text-slate-500 mb-6">Start by adding your first restaurant</p>
+                      <button
+                        onClick={() => handleAdd("restaurant")}
+                        className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200"
+                      >
+                        Add Your First Restaurant
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Products Tab */}
+              {activeTab === "products" && (
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+                    <h2 className="text-3xl font-bold text-slate-900 mb-4 sm:mb-0">My Products</h2>
+                    <button
+                      onClick={() => handleAdd("product")}
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span>Add Product</span>
+                    </button>
+                  </div>
+
+                  {productsLoading ? (
+                    <div className="text-center py-12">
+                      <div className="mx-auto flex py-16">
+                        <Loader />
+                      </div>
+                      <p className="text-slate-500 mt-4">Loading products...</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {products.map((product) => (
+                        <ProductCard
+                          key={product.id}
+                          product={product}
+                          showActions={true}
+                          onEdit={() => handleEdit("product", product)}
+                          onDelete={() => handleDelete("product", product.id)}
+                          onViewDetails={() => handleViewDetails(product)}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {products.length === 0 && !productsLoading && (
+                    <div className="text-center py-16">
+                      <Package className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-slate-600 mb-2">No products yet</h3>
+                      <p className="text-slate-500 mb-6">Start by adding your first product</p>
+                      <button
+                        onClick={() => handleAdd("product")}
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200"
+                      >
+                        Add Your First Product
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Orders Tab */}
+              {activeTab === "orders" && (
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+                    <h2 className="text-3xl font-bold text-slate-900 mb-4 sm:mb-0">Order Management</h2>
+                    <button
+                      onClick={fetchMyOrders}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <span>Refresh Orders</span>
+                    </button>
+                  </div>
+
+                  {ordersLoading ? (
+                    <div className="text-center py-12">
+                      <div className="mx-auto flex py-16">
+                        <Loader />
+                      </div>
+                      <p className="text-slate-500 mt-4">Loading orders...</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {orders.map((order) => (
+                        <div
+                          key={order.id}
+                          className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow"
+                        >
+                          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-4 mb-4">
+                                <h3 className="text-xl font-bold text-gray-900">Order #{order.id}</h3>
+                                <span
+                                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadgeColor(order.status)}`}
+                                >
+                                  {getStatusIcon(order.status)}
+                                  {order.status}
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                                <div className="flex items-center space-x-2 text-gray-600">
+                                  <User className="w-4 h-4" />
+                                  <span className="font-medium">Customer:</span>
+                                  <span>{order.full_name}</span>
+                                </div>
+                                <div className="flex items-center space-x-2 text-gray-600">
+                                  <Phone className="w-4 h-4" />
+                                  <span>{order.phone}</span>
+                                </div>
+                                <div className="flex items-center space-x-2 text-gray-600">
+                                  <Mail className="w-4 h-4" />
+                                  <span>{order.email}</span>
+                                </div>
+                                <div className="flex items-center space-x-2 text-gray-600">
+                                  <Calendar className="w-4 h-4" />
+                                  <span>{new Date(order.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex items-center space-x-2 text-gray-600">
+                                  <DollarSign className="w-4 h-4" />
+                                  <span className="font-semibold text-emerald-600">
+                                    Rs. {Number(order.total_price || 0).toFixed(2)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center space-x-2 text-gray-600">
+                                  <Package className="w-4 h-4" />
+                                  <span>{order.items?.length || 0} items</span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center space-x-2 text-gray-600 mb-4">
+                                <MapPin className="w-4 h-4" />
+                                <span className="text-sm">
+                                  {order.address_line1}, {order.city}, {order.country}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-3 mt-4 lg:mt-0">
+                              <button
+                                onClick={() => handleViewOrder(order)}
+                                className="flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                              >
+                                <Eye className="w-4 h-4" />
+                                <span>View Details</span>
+                              </button>
+
+                              {order.status === "Pending" && (
+                                <button
+                                  onClick={() => updateOrderStatus(order.id, "Confirmed")}
+                                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                >
+                                  <Check className="w-4 h-4" />
+                                  <span>Confirm Order</span>
+                                </button>
+                              )}
+
+                              {order.status === "Confirmed" && (
+                                <button
+                                  onClick={() => updateOrderStatus(order.id, "Shipped")}
+                                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                                >
+                                  <Truck className="w-4 h-4" />
+                                  <span>Mark as Shipped</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {orders.length === 0 && !ordersLoading && (
+                    <div className="text-center py-16">
+                      <ShoppingBag className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-slate-600 mb-2">No orders yet</h3>
+                      <p className="text-slate-500 mb-6">Orders from customers will appear here</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {showAddForm && (
+            <AddEditForm
+              editingItem={editingItem}
+              setShowAddForm={setShowAddForm}
+              restaurants={restaurants}
+              setRestaurants={setRestaurants}
+              products={products}
+              setProducts={setProducts}
+            />
+          )}
+
+          {/* Order Details Modal */}
+          {showOrderDetails && selectedOrder && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                {/* Modal Header */}
+                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Order Details #{selectedOrder.id}
+                    </h2>
+                    <button
+                      onClick={() => setShowOrderDetails(false)}
+                      className="text-gray-400 hover:text-gray-600 p-2"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Modal Content */}
+                <div className="p-6">
+                  {/* Order Status and Date */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                    <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+                      <span
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${getStatusBadgeColor(
+                          selectedOrder.status
+                        )}`}
+                      >
+                        {getStatusIcon(selectedOrder.status)}
+                        {selectedOrder.status}
+                      </span>
+                      <span className="text-gray-500">
+                        Order Date: {new Date(selectedOrder.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500">Total Amount</p>
+                      <p className="text-2xl font-bold text-emerald-600">
+                        Rs. {Number(selectedOrder.total_amount || 0).toFixed(2)}
+                        
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Customer Information */}
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <User className="w-5 h-5" />
+                        Customer Information
+                      </h3>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">Full Name</p>
+                          <p className="text-gray-900">{selectedOrder.full_name}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">Email</p>
+                          <p className="text-gray-900">{selectedOrder.email}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">Phone</p>
+                          <p className="text-gray-900">{selectedOrder.phone}</p>
+                        </div>
+                        <div className="pt-2">
+                          <a
+                            href={`tel:${selectedOrder.phone}`}
+                            className="inline-flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+                          >
+                            <Phone className="w-4 h-4" />
+                            <span>Call Customer</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Shipping Address */}
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <MapPin className="w-5 h-5" />
+                        Shipping Address
+                      </h3>
+                      <div className="space-y-2">
+                        <p className="text-gray-900">{selectedOrder.full_name}</p>
+                        <p className="text-gray-700">{selectedOrder.address_line1}</p>
+                        {selectedOrder.address_line2 && (
+                          <p className="text-gray-700">{selectedOrder.address_line2}</p>
+                        )}
+                        <p className="text-gray-700">
+                          {selectedOrder.city}, {selectedOrder.country}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Order Items */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Package className="w-5 h-5" />
+                      Order Items ({selectedOrder.items?.length || 0})
+                    </h3>
+                    <div className="space-y-4">
+                      {selectedOrder.items?.map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center space-x-4 bg-white border border-gray-200 rounded-xl p-4"
+                        >
+                          <div className="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0">
+                            {item.product?.image ? (
+                              <img
+                                src={item.product.image}
+                                alt={item.product_name || item.product?.name}
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <Package className="w-6 h-6" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">
+                              {item.product_name || item.product?.name || "Unknown Product"}
+                            </h4>
+                            <p className="text-sm text-gray-500">
+                              Quantity: {item.quantity} × Rs. {Number(item.price || 0).toFixed(2)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-gray-900">
+                              Rs. {Number(item.subtotal || 0).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Order Actions */}
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      {selectedOrder.status === "Pending" && (
+                        <button
+                          onClick={() => {
+                            updateOrderStatus(selectedOrder.id, "Confirmed");
+                            setShowOrderDetails(false);
+                          }}
+                          className="flex items-center justify-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        >
+                          <Check className="w-5 h-5" />
+                          <span>Confirm Order</span>
+                        </button>
+                      )}
+
+                      {selectedOrder.status === "Confirmed" && (
+                        <button
+                          onClick={() => {
+                            updateOrderStatus(selectedOrder.id, "Shipped");
+                            setShowOrderDetails(false);
+                          }}
+                          className="flex items-center justify-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                        >
+                          <Truck className="w-5 h-5" />
+                          <span>Mark as Shipped</span>
+                        </button>
+                      )}
+
+                      {selectedOrder.status === "Shipped" && (
+                        <button
+                          onClick={() => {
+                            updateOrderStatus(selectedOrder.id, "Delivered");
+                            setShowOrderDetails(false);
+                          }}
+                          className="flex items-center justify-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          <Check className="w-5 h-5" />
+                          <span>Mark as Delivered</span>
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => setShowOrderDetails(false)}
+                        className="flex items-center justify-center space-x-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <span>Close</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default ProfilePage;
+import axios from "axios";
+
+const axiosInstance = axios.create({
+  baseURL: "http://localhost:8000",
+  timeout: 10000,
+  withCredentials: true,
+});
+
+// Request interceptor
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const storedData = localStorage.getItem("userData");
+    const parsedData = storedData ? JSON.parse(storedData) : null;
+    const token = parsedData?.token || null;
+
+    // ✅ Hamesha token bhejna agar available ho
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    if (config.method && config.method.toUpperCase() !== "GET") {
+      config.headers["Content-Type"] = "application/json";
+    }
+
+    return config;
+  },
+  (error) => {
+    console.error("Request interceptor error:", error);
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error(
+      `❌ ${error.config?.method?.toUpperCase()} ${error.config?.url}:`,
+      {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      }
+    );
+    return Promise.reject(error);
+  }
+);
+
+// Main apiServer function
+const apiServer = async (url, method = "GET", data = {}) => {
+  try {
+    const config = {
+      method: method.toUpperCase(),
+      url,
+    };
+
+    if (method.toUpperCase() !== "GET" && data) {
+      config.data = data;
+    }
+
+    console.log(
+      `🔄 Making ${method.toUpperCase()} request to ${url}`,
+      data ? { data } : ""
+    );
+
+    const response = await axiosInstance(config);
+
+    const responseData = response.data;
+
+    if (responseData && typeof responseData.error !== "undefined") {
+      return {
+        error: responseData.error,
+        message:
+          responseData.message ||
+          (responseData.error ? "An error occurred" : "Success"),
+        data: responseData.data || responseData,
+        status: response.status,
+      };
+    }
+
+    return {
+      error: false,
+      message: "Success",
+      data: responseData,
+      status: response.status,
+    };
+  } catch (err) {
+    console.error("❌ API Error Details:", {
+      url,
+      method,
+      status: err.response?.status,
+      statusText: err.response?.statusText,
+      responseData: err.response?.data,
+      requestData: data,
+      message: err.message,
+    });
+
+    if (err.response) {
+      const errorData = err.response.data;
+
+      return {
+        error: true,
+        message:
+          errorData?.message ||
+          errorData?.detail ||
+          errorData?.error ||
+          `Server Error (${err.response.status})`,
+        status: err.response.status,
+        data: errorData || {},
+      };
+    } else if (err.request) {
+      return {
+        error: true,
+        message: "Network error. Please check your internet connection.",
+        status: 0,
+        data: {},
+      };
+    } else {
+      return {
+        error: true,
+        message: err.message || "Something went wrong",
+        status: 0,
+        data: {},
+      };
+    }
+  }
+};
+
+export default apiServer;
+
+
+// src/utils/apiServer.js
+import axios from "axios";
+
+// axios instance
+const axiosInstance = axios.create({
+  baseURL: "http://localhost:8000",
+  timeout: 5000,
+  withCredentials: true,
+});
+
+// 🔹 Add interceptor to attach token if present
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
+  return config;
+});
+
+const apiServer = async (url, method = "GET", data = {}) => {
+  try {
+    const config = {
+      method,
+      url,
+      data,
+    };
+
+    const response = await axiosInstance(config);
+
+    return {
+      error: false,
+      message: "Success",
+      data: response.data,
+    };
+  } catch (err) {
+    console.error("API Error:", err.response?.data);
+    return {
+      error: true,
+      message:
+        err.response?.data?.message ||
+        err.response?.data?.detail ||
+        "Something went wrong",
+      status: err.response?.status || 500,
+      data: err.response?.data || {},
+    };
+  }
+};
+
+export default apiServer;
+
+
+
+import { Navigate, useLocation } from "react-router-dom";
+import protectedRoutes from "../config/protectedRoutes.js";
+
+const AuthLayout = ({ children }) => {
+
+    const location = useLocation();
+
+    // Cookie se value nikalne ka helper function
+    const getCookie = (name) => {
+        const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+        return match ? decodeURIComponent(match[2]) : null;
+    };
+
+    const token = getCookie("access_token");
+
+    // Check if current path is protected
+    const isProtected = protectedRoutes.includes(location.pathname);
+
+    
+
+    // Redirect to login if trying to access protected route without token
+    if (isProtected && !token) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return children;
+};
+
+export default AuthLayout;
+
+
+// src/apiServer.js
+
+import axios from 'axios';
+
+
+
+const axiosInstance = axios.create({
+  baseURL: 'http://localhost:8000',
+  timeout: 5000,
+  withCredentials: true,
+});
+
+
+
+const apiServer = async (url, method = 'GET', data = {}) => {
+  try {
+    const config = {
+      method,
+      url,
+      data,
+    };
+
+    const response = await axiosInstance(config);
+
+    return {
+      error: false,
+      message: 'Success',
+      data: response.data,
+    };
+  } catch (err) {
+    console.error("API Error:", err.response?.data);
+    return {
+      error: true,
+      message: err.response?.data?.message || err.response?.data?.detail || 'Something went wrong',
+      status: err.response?.status || 500,
+      data: err.response?.data || {}
+    };
+  }
+};
+
+export default apiServer;
+
+import { Eye, EyeOff, Lock, Mountain } from "lucide-react";
+import { useState } from "react";
+import apiServer from "../../utils/apiServer";
+import API_ROUTES from "../../apiRoutes";
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import ClipLoader from "react-spinners/ClipLoader";
+import { useAuth } from "../../context/AuthContext";
+const Login = () => {
+
+  const { setUser } = useAuth();
+const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [formData, setFormData] = useState({
+    username: "",  
+    password: "",
+  });
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  const payload = {
+    username: formData.username,
+    password: formData.password,
+  };
+
+  const response = await apiServer(API_ROUTES.LOGIN, "POST", payload);
+ 
+  // 🔹 Step 1: Agar error hai to yahin toast dikhake return karo
+  if (response.error) {
+    console.error("Login failed:", response.message);
+    const errorMessage = response.message || "Something went wrong";
+
+    if (errorMessage.toLowerCase().includes("invalid credentials")) {
+      toast.error("User does not exist or incorrect password");
+    } else if (errorMessage.toLowerCase().includes("inactive")) {
+      toast.error("User is inactive");
+    } else {
+      toast.error(errorMessage);
+    }
+        setLoading(false);
+    return; // yahin ruk jao
+  }
+
+  // 🔹 Step 2: Agar success hai to user save karo
+  const { access, user } = response.data;
+  if (user) {
+    localStorage.setItem("user", JSON.stringify(user));
+  } else {
+    localStorage.removeItem("user");
+  }
+
+    setUser(user);
+  toast.success("Login successful!");
+  console.log("Access Token:", access);
+  navigate("/");
+};
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full -translate-y-16 translate-x-16 opacity-50"></div>
+
+        <div className="relative z-10">
+          <div className="text-center mb-8">
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-3 rounded-xl w-fit mx-auto mb-4">
+              <Mountain className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+            <p className="text-gray-600">Sign in to explore Gilgit-Baltistan</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+              <input
+                type="text"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                placeholder="Enter your username"
+                required
+              />
+
+
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                  placeholder="Enter your password"
+                  required
+                />
+
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+
+              <button
+                type="button"
+                className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                onClick={() => navigate('/forgot-password')}
+              >
+                Forgot password?
+              </button>
+            </div>
+
+           <button
+    type="submit"
+    disabled={loading}
+    className={`w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 rounded-lg font-semibold transition-all duration-200 ${
+      loading
+        ? "opacity-70 cursor-not-allowed"
+        : "hover:shadow-lg transform hover:scale-[1.02]"
+    }`}
+  >
+    {loading ? (
+      <span className="flex items-center justify-center gap-2">
+        <ClipLoader size={20} color="#fff" />
+        
+      </span>
+    ) : (
+      "Sign In"
+    )}
+  </button>
+          </form>
+
+          <div className="mt-8 text-center">
+            <p className="text-gray-600">
+              Don't have an account?{" "}
+              <button
+                onClick={() => navigate('/signup')}
+                className="text-emerald-600 hover:text-emerald-700 font-medium"
+              >
+                Sign up
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
+
+
+
+
+// src/apiServer.js
+
+import axios from 'axios';
+
+// Helper function to get token from cookies
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+};
+
+// Helper function to get token from localStorage or cookies
+const getAuthToken = () => {
+  // First try localStorage
+  let token = localStorage.getItem('access_token') || localStorage.getItem('token');
+
+  // If not in localStorage, try cookies
+  if (!token) {
+    token = getCookie('access_token') || getCookie('token');
+  }
+
+  return token;
+};
+
+const axiosInstance = axios.create({
+  baseURL:"http://127.0.0.1:8000",
+  timeout: 5000,
+  withCredentials: true,
+});
+
+// Add request interceptor to include token
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = getAuthToken();
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // For FormData, don't set Content-Type - let browser handle it
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    } else {
+      config.headers['Content-Type'] = 'application/json';
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle token refresh or logout
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token might be expired, you can handle refresh here
+      console.error('Authentication failed - token may be expired');
+    }
+    return Promise.reject(error);
+  }
+);
+
+const apiServer = async (url, method = 'GET', data = {}) => {
+  try {
+    const config = {
+      method,
+      url,
+      data,
+    };
+
+    const response = await axiosInstance(config);
+
+    return {
+      error: false,
+      message: 'Success',
+      data: response.data,
+    };
+  } catch (err) {
+    console.error("API Error:", err.response?.data);
+    return {
+      error: true,
+      message: err.response?.data?.message || err.response?.data?.detail || 'Something went wrong',
+      status: err.response?.status || 500,
+      data: err.response?.data || {}
+    };
+  }
+};
+
+export default apiServer;
+// AuthContext.jsx
+import { createContext, useContext, useState, useEffect } from "react";
+
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+ const storedUser = localStorage.getItem("user");
+const [user, setUser] = useState(
+  storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null
+);
+
+ useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
+
+  return (
+    <AuthContext.Provider value={{ user, setUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);
+
+import { Eye, EyeOff, Lock, Mail, Mountain, Phone, User } from "lucide-react";
+import { useState } from "react";
+import apiServer from "../../utils/apiServer.js";
+import API_ROUTES from "../../apiRoutes.js";
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import ClipLoader from "react-spinners/ClipLoader";
+import { Link } from "react-router-dom";
+const Signup = () => {
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+        phone: '',
+        password: '',
+        confirmPassword: '',
+        userType: 'tourist',
+        agreeTerms: false,
+        shopName: '',
+        address: ''
+    });
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (formData.password !== formData.confirmPassword) {
+            toast.error( "Password is not match");
+            return;
+        }
+        setLoading(true);
+
+        const payload = {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            username: formData.username,
+            email: formData.email,
+            phone: formData.phone,
+            password: formData.password,
+            confirm_password: formData.confirmPassword,
+            role: formData.userType === "business" ? "business_owner" : "tourist",
+        };
+
+        if (formData.userType === "business") {
+            payload.shop_name = formData.shopName;
+            payload.address = formData.address;
+        }
+
+        try {
+            const res = await apiServer(API_ROUTES.REGISTER, "POST", payload);
+           
+            console.log("User data saved to localstorage:", res.data);
+             toast.success("Registration successful!");
+            navigate('/login');
+        } catch (error) {
+            console.error("Registration error:", error.response?.data || error.message);
+          toast.success("Something went wrong during registration");
+        }
+           setLoading(false);
+    };
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full -translate-y-16 -translate-x-16 opacity-50"></div>
+
+                <div className="relative z-10">
+                    <div className="text-center mb-8">
+                        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-3 rounded-xl w-fit mx-auto mb-4">
+                            <Mountain className="h-8 w-8 text-white" />
+                        </div>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Join GB Green Guide</h2>
+                        <p className="text-gray-600">Start your journey in Gilgit-Baltistan</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        value={formData.firstName}
+                                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                                        placeholder="First name"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        value={formData.lastName}
+                                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                                        placeholder="Last name"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                            <input
+                                type="text"
+                                value={formData.username}
+                                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                                placeholder="Your username"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                <input
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                                    placeholder="Enter your email"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                            <div className="relative">
+                                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                <input
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                                    placeholder="+92 300 1234567"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">I am a</label>
+                            <select
+                                value={formData.userType}
+                                onChange={(e) => setFormData({ ...formData, userType: e.target.value })}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                            >
+                                <option value="tourist">Tourist</option>
+                                <option value="business">Business Owner</option>
+                            </select>
+                        </div>
+
+                        {formData.userType === "business" && (
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Shop Name</label>
+                                    <input
+                                        type="text"
+                                        value={formData.shopName}
+                                        onChange={(e) => setFormData({ ...formData, shopName: e.target.value })}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                                        placeholder="Your shop name"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                    <input
+                                        type="text"
+                                        value={formData.address}
+                                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                                        placeholder="Business location"
+                                        required
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        <div className="grid grid-cols-1 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                                        placeholder="Create password"
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <input
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        value={formData.confirmPassword}
+                                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                        className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                                        placeholder="Confirm password"
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    
+
+                          <button
+    type="submit"
+    disabled={loading}
+    className={`w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 rounded-lg font-semibold transition-all duration-200 ${
+      loading
+        ? "opacity-70 cursor-not-allowed"
+        : "hover:shadow-lg transform hover:scale-[1.02]"
+    }`}
+  >
+    {loading ? (
+      <span className="flex items-center justify-center gap-2">
+        <ClipLoader size={20} color="#fff" />
+        
+      </span>
+    ) : (
+      "Sign up"
+    )}
+  </button>
+                    </form>
+
+                    <p className="mt-6 text-center text-gray-600">
+                        Already have an account?{' '}
+<Link 
+  to="/login" 
+  className="text-emerald-600 hover:text-emerald-700 font-semibold"
+>
+  Login
+</Link>
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Signup;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// AuthContext.jsx
+import { createContext, useContext, useState, useEffect } from "react";
+
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const storedUser = localStorage.getItem("user");
+  const storedToken = localStorage.getItem("access_token");
+
+  const [user, setUser] = useState(
+    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null
+  );
+  const [token, setToken] = useState(storedToken || null);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem("access_token", token);
+    } else {
+      localStorage.removeItem("access_token");
+    }
+  }, [token]);
+
+  return (
+    <AuthContext.Provider value={{ user, setUser, token, setToken }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => useContext(AuthContext);
+import { Navigate, useLocation } from "react-router-dom";
+import protectedRoutes from "../config/protectedRoutes.js";
+
+const AuthLayout = ({ children }) => {
+  const location = useLocation();
+  const token = localStorage.getItem("access_token");
+
+  const isProtected = protectedRoutes.includes(location.pathname);
+
+  if (isProtected && !token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+export default AuthLayout;
+rewirete same code wiht seorate file just
+
+
