@@ -4,17 +4,10 @@ import toast from "react-hot-toast";
 
 // ✅ Base API URL (local dev / prod change accordingly)
 // const baseURL = "http://localhost:8000";
-// const baseURL = "https://gbgreenguidebackend-production.up.railway.app/";
-// const baseURL = "https://gbgreenguidebackend-production.up.railway.app/api/";
 
-const baseURL = "https://gbgreenguidebackend-production.up.railway.app";
+const baseURL = "https://gbgreenguidebackend-production.up.railway.app"; 
 
-const endpoints = {
-  accounts: `${baseURL}/api/accounts/`,
-  core: `${baseURL}/api/`,
-  business: `${baseURL}/business/`,
-  ecommerce: `${baseURL}/ecommerce/`,
-};
+
 
 
 
