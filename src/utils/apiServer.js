@@ -3,9 +3,9 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 // ✅ Base API URL (local dev / prod change accordingly)
-// const baseURL = "http://localhost:8000";
+const baseURL = "http://localhost:8000";
 
-const baseURL = "https://gbgreenguidebackend-production-4fb6.up.railway.app"; // no slash
+// const baseURL = "https://gbgreenguidebackend-production-4fb6.up.railway.app"; // no slash
 
 
 
