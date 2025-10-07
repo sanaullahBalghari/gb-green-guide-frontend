@@ -4,7 +4,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
-
+import RestaurantRouteWrapper from "./components/RestaurantRouteWrapper";
 // Import all pages
 import {
   Home,
@@ -18,7 +18,7 @@ import {
   EventsPage,
   Torsitprofile,
   RestaurantListPage,
-  RestaurantDetailPage,
+  // RestaurantDetailPage,
   ProductListPage,
   ProductDetailPage,
   CartPage,
@@ -58,7 +58,8 @@ const AppWrapper = () => {
         <Route path="/cities/:cityName" element={<CityDetailPage />} />
         <Route path="/toursit-profile" element={<Torsitprofile />} />
         <Route path="/restaurant" element={<RestaurantListPage />} />
-        <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
+        {/* <Route path="/restaurants/:id" element={<RestaurantDetailPage />} /> */}
+        <Route path="/restaurants/:id" element={<RestaurantRouteWrapper />} />
         <Route path="/products" element={<ProductListPage />} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/events" element={<EventsPage />} />

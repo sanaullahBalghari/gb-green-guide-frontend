@@ -8,31 +8,40 @@ import ErrorMessage from "../components/common/ErrorMessage";
 const RestaurantDetailPage = ({ restaurant: selectedRestaurantProp, onBack }) => {
   const [restaurant, setRestaurant] = useState(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const { restaurants, loading, error } = useRestaurants({ showLoader: true });
+  
+  // ✅ Fix: Only fetch if we don't have complete restaurant data
+  const shouldFetch = selectedRestaurantProp?.id && !selectedRestaurantProp?.description;
+  
+  const { restaurant: fetchedRestaurant, loading, error } = useRestaurants({ 
+    showLoader: true,
+    restaurantId: shouldFetch ? selectedRestaurantProp.id : null
+  });
 
-
-  // ✅ Fetch restaurant from backend if passed prop is just id or undefined
+  // ✅ Set restaurant data from prop or fetched data
   useEffect(() => {
-    if (selectedRestaurantProp?.id) {
-      const found = restaurants.find(r => r.id === selectedRestaurantProp.id);
-      if (found) setRestaurant(found);
-      else setRestaurant(selectedRestaurantProp); // fallback
+    if (selectedRestaurantProp) {
+      // If prop has complete data, use it directly
+      if (selectedRestaurantProp.description) {
+        setRestaurant(selectedRestaurantProp);
+      } 
+      // If we fetched the data, use that
+      else if (fetchedRestaurant) {
+        setRestaurant(fetchedRestaurant);
+      }
     }
-  }, [selectedRestaurantProp, restaurants]);
+  }, [selectedRestaurantProp, fetchedRestaurant]);
 
   useEffect(() => {
     console.log('Restaurant details:', restaurant);
   }, [restaurant]);
 
-  // Add null check before rendering
-  if (loading) {
+  // Show loading only when we're actually fetching
+  if (shouldFetch && loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
         <Loader />
         <p className="text-slate-500">Loading restaurant details...</p>
       </div>
-
-
     );
   }
 
@@ -44,7 +53,7 @@ const RestaurantDetailPage = ({ restaurant: selectedRestaurantProp, onBack }) =>
     );
   }
 
-  // Add this check to prevent the error
+  // Only show loader if we don't have any restaurant data at all
   if (!restaurant) {
     return (
       <div className="flex justify-center items-center py-16">
@@ -144,7 +153,7 @@ const RestaurantDetailPage = ({ restaurant: selectedRestaurantProp, onBack }) =>
               <div className="bg-white rounded-2xl shadow-lg p-8">
                 <h3 className="text-xl font-bold text-slate-900 mb-6">Restaurant Statistics</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {/* Room Status - FIXED */}
+                  {/* Room Status */}
                   <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-xl text-center border border-emerald-100">
                     <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <Bed className="w-4 h-4 text-emerald-600" />
@@ -223,17 +232,6 @@ const RestaurantDetailPage = ({ restaurant: selectedRestaurantProp, onBack }) =>
                       </div>
                     </button>
                   )}
-
-                  {/* <button
-                    onClick={() => setShowBookingForm(true)}
-                    className="group w-full relative overflow-hidden bg-gradient-to-r from-purple-500 to-pink-600 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:scale-105"
-                  >
-                    <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-12"></div>
-                    <div className="relative flex items-center justify-center gap-3">
-                      <Calendar className="w-5 h-5" />
-                      <span>Book Room</span>
-                    </div>
-                  </button> */}
                 </div>
               </div>
             </div>

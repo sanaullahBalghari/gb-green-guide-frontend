@@ -92,18 +92,11 @@ const RestaurantListPage = ({ isOwnerProfile = false }) => {
               
               {/* ✅ Status/Count Display */}
               <div className="flex items-center">
-                {loading ? (
-                  <div className="flex items-center gap-3">
-                    <Loader />
-                    <p className="text-slate-500">Loading restaurants...</p>
-                  </div>
-                ) : error ? (
-                  <p className="text-red-600 font-medium">❌ {error}</p>
-                ) : (
+               
                   <p className="text-slate-600">
                     {filteredRestaurants.length} restaurant{filteredRestaurants.length !== 1 ? 's' : ''} found
                   </p>
-                )}
+                
               </div>
 
               {/* ✅ Search Input */}
