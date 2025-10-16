@@ -278,13 +278,12 @@ const ProductDetailPage = () => {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Product not found</h2>
-                    <button
-                        onClick={() => navigate('/products')}
-                        className="text-emerald-600 hover:text-emerald-700 font-medium"
-                    >
-                        Back to Products
-                    </button>
+                <div className="flex flex-col items-center justify-center py-20 gap-4 text-center mx-auto">
+                <Loader />
+                <p className="text-slate-500">Loading Products...</p>
+              </div>
+            
+        
                 </div>
             </div>
         );
