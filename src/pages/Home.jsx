@@ -48,9 +48,9 @@ const Home = () => {
         }));
     };
 
-    const handleRestaurantDetails = (restaurant) => {
-        navigate(`/restaurants/${restaurant.id}`);
-    };
+  const handleRestaurantDetails = (restaurant) => {
+    navigate(`/restaurants/${restaurant.id}`, { state: { restaurant } });
+};
 
     // ✅ Product details handler for the slider
     const handleProductDetails = (product) => {
