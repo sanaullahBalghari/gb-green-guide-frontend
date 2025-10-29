@@ -310,64 +310,64 @@ const ProfilePage = () => {
       </div>
 
       {/* Tabs - Different for business owners vs tourists */}
-      <section className="bg-white/90 backdrop-blur-sm border-t shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
-            {user?.role === "business_owner" ? (
-              <>
-                <button
-                  onClick={() => setActiveTab("restaurants")}
-                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-semibold transition-all duration-200 ${
-                    activeTab === "restaurants"
-                      ? "border-emerald-500 text-emerald-600"
-                      : "border-transparent text-slate-600 hover:text-emerald-600 hover:border-emerald-200"
-                  }`}
-                >
-                  <Utensils className="h-5 w-5" />
-                  <span>My Restaurants ({restaurants.length})</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("products")}
-                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-semibold transition-all duration-200 ${
-                    activeTab === "products"
-                      ? "border-emerald-500 text-emerald-600"
-                      : "border-transparent text-slate-600 hover:text-emerald-600 hover:border-emerald-200"
-                  }`}
-                >
-                  <Package className="h-5 w-5" />
-                  <span>My Products ({products.length})</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("orders")}
-                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-semibold transition-all duration-200 ${
-                    activeTab === "orders"
-                      ? "border-emerald-500 text-emerald-600"
-                      : "border-transparent text-slate-600 hover:text-emerald-600 hover:border-emerald-200"
-                  }`}
-                >
-                  <ShoppingBag className="h-5 w-5" />
-                  <span>Order Management</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => setActiveTab("orders")}
-                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-semibold transition-all duration-200 ${
-                    activeTab === "orders"
-                      ? "border-emerald-500 text-emerald-600"
-                      : "border-transparent text-slate-600 hover:text-emerald-600 hover:border-emerald-200"
-                  }`}
-                >
-                  <ShoppingBag className="h-5 w-5" />
-                  <span>My Orders</span>
-                </button>
-             
-              </>
-            )}
-          </div>
-        </div>
-      </section>
+  {/* Tabs - Different for business owners vs tourists */}
+<section className="bg-white/90 backdrop-blur-sm border-t shadow-sm sticky top-0 z-40">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex space-x-8 overflow-x-auto scrollbar-thin scrollbar-thumb-emerald-500 scrollbar-track-slate-100">
+      {user?.role === "business_owner" ? (
+        <>
+          <button
+            onClick={() => setActiveTab("restaurants")}
+            className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-semibold transition-all duration-200 whitespace-nowrap ${
+              activeTab === "restaurants"
+                ? "border-emerald-500 text-emerald-600"
+                : "border-transparent text-slate-600 hover:text-emerald-600 hover:border-emerald-200"
+            }`}
+          >
+            <Utensils className="h-5 w-5 flex-shrink-0" />
+            <span>My Restaurants ({restaurants.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("products")}
+            className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-semibold transition-all duration-200 whitespace-nowrap ${
+              activeTab === "products"
+                ? "border-emerald-500 text-emerald-600"
+                : "border-transparent text-slate-600 hover:text-emerald-600 hover:border-emerald-200"
+            }`}
+          >
+            <Package className="h-5 w-5 flex-shrink-0" />
+            <span>My Products ({products.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("orders")}
+            className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-semibold transition-all duration-200 whitespace-nowrap ${
+              activeTab === "orders"
+                ? "border-emerald-500 text-emerald-600"
+                : "border-transparent text-slate-600 hover:text-emerald-600 hover:border-emerald-200"
+            }`}
+          >
+            <ShoppingBag className="h-5 w-5 flex-shrink-0" />
+            <span>Order Management</span>
+          </button>
+        </>
+      ) : (
+        <>
+          <button
+            onClick={() => setActiveTab("orders")}
+            className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-semibold transition-all duration-200 whitespace-nowrap ${
+              activeTab === "orders"
+                ? "border-emerald-500 text-emerald-600"
+                : "border-transparent text-slate-600 hover:text-emerald-600 hover:border-emerald-200"
+            }`}
+          >
+            <ShoppingBag className="h-5 w-5 flex-shrink-0" />
+            <span>My Orders</span>
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+</section>
 
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

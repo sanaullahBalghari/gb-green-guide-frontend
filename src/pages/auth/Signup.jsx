@@ -27,7 +27,7 @@ const Signup = () => {
         address: ''
     });
 
-const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
   e.preventDefault();
   if (formData.password !== formData.confirmPassword) {
     toast.error("Password is not match");
@@ -77,52 +77,50 @@ const handleSubmit = async (e) => {
     navigate("/login");
   } catch (error) {
     console.error("Registration error:", error.response?.data || error.message);
-    toast.error("Something went wrong during registration");
+    
+    // Show specific backend error messages
+    if (error.response?.data) {
+      const errorData = error.response.data;
+      
+      // Check for password errors
+      if (errorData.password) {
+        toast.error(Array.isArray(errorData.password) ? errorData.password[0] : errorData.password);
+      }
+      // Check for email errors
+      else if (errorData.email) {
+        toast.error(Array.isArray(errorData.email) ? errorData.email[0] : errorData.email);
+      }
+      // Check for username errors
+      else if (errorData.username) {
+        toast.error(Array.isArray(errorData.username) ? errorData.username[0] : errorData.username);
+      }
+      // Check for phone errors
+      else if (errorData.phone) {
+        toast.error(Array.isArray(errorData.phone) ? errorData.phone[0] : errorData.phone);
+      }
+      // Check for confirm_password errors
+      else if (errorData.confirm_password) {
+        toast.error(Array.isArray(errorData.confirm_password) ? errorData.confirm_password[0] : errorData.confirm_password);
+      }
+      // Check for general error message
+      else if (errorData.message) {
+        toast.error(errorData.message);
+      }
+      else if (errorData.error) {
+        toast.error(errorData.error);
+      }
+      // Fallback to generic error
+      else {
+        toast.error("Something went wrong during registration");
+      }
+    } else {
+      toast.error("Something went wrong during registration");
+    }
   }
   setLoading(false);
 };
 
 
-//     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         if (formData.password !== formData.confirmPassword) {
-//             toast.error( "Password is not match");
-//             return;
-//         }
-//         setLoading(true);
-
-//         const payload = {
-//             first_name: formData.firstName,
-//             last_name: formData.lastName,
-//             username: formData.username,
-//             email: formData.email,
-//             phone: formData.phone,
-//             password: formData.password,
-//             confirm_password: formData.confirmPassword,
-//             role: formData.userType === "business" ? "business_owner" : "tourist",
-//         };
-
-//         if (formData.userType === "business") {
-//             payload.shop_name = formData.shopName;
-//             payload.address = formData.address;
-//         }
-
-//         try {
-//             const res = await apiServer(API_ROUTES.REGISTER, "POST", payload);
-           
-//            // 👇 yahan login jaisa save karo
-//    localStorage.setItem("user", JSON.stringify(res.data.data));
-// setUser(res.data.data);
-
-//  console.log("User saved after register =>", res.data.user);
-//              toast.success("Registration successful!");
-//             navigate('/login');
-//         } catch (error) {
-//             console.error("Registration error:", error.response?.data || error.message);
-//           toast.success("Something went wrong during registration");
-//         }
-//            setLoading(false);
-//     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 flex items-center justify-center p-4">
