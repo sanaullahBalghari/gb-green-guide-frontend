@@ -5,14 +5,15 @@ import useRestaurants from '../hooks/useRestaurants';
 import EventCard from '../components/common/EventCard';
 import CityCard from "../components/common/CityCard";
 import RestaurantCard from '../components/common/RestaurantCard';
-import ProductSliderSection from '../components/ProductSliderSection'; // ✅ Import new slider component
+import ProductSliderSection from '../components/ProductSliderSection';
 import { useNavigate } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { slugify } from "../utils/fixRouteSpace"
 import ErrorMessage from '../components/common/ErrorMessage';
 import Loader from '../components/common/Loader';
 import useProducts from '../hooks/useProducts';
 import GalleryPreview from '../components/GalleryPreview';
+
 const Home = () => {
     const navigate = useNavigate();
     const { products, loading: productsLoading, error: productsError } = useProducts({});
@@ -23,6 +24,29 @@ const Home = () => {
     const randomCities = getRandomCities(3);
     const randomRestaurants = getRandomRestaurants(3);
     const [expandedCards, setExpandedCards] = useState({});
+
+    // Hero Section Image Slideshow State
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Curated images for hero section
+    const heroImages = [
+        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop',
+        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&h=1080&fit=crop',
+        'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1920&h=1080&fit=crop',
+        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop&sat=-20',
+        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop&q=80'
+    ];
+
+    // Auto-change images every 5 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentImageIndex((prevIndex) => 
+                prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
+            );
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const handleExploreClick = () => {
         navigate('/cities');
@@ -48,21 +72,13 @@ const Home = () => {
         }));
     };
 
-  const handleRestaurantDetails = (restaurant) => {
-    navigate(`/restaurants/${restaurant.id}`, { state: { restaurant } });
-};
+    const handleRestaurantDetails = (restaurant) => {
+        navigate(`/restaurants/${restaurant.id}`);
+    };
 
-    // ✅ Product details handler for the slider
     const handleProductDetails = (product) => {
         navigate(`/products/${product.id}`);
     };
-
-    // const galleryImages = [
-    //     "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop",
-    //     "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=300&h=300&fit=crop",
-    //     "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=300&h=300&fit=crop",
-    //     "https://images.unsplash.com/photo-1522383225653-ed111181a951?w=300&h=300&fit=crop",
-    // ];
 
     const handleCityCardClick = (cityName) => {
         navigate(`cities/${slugify(cityName)}`)
@@ -71,64 +87,133 @@ const Home = () => {
     return (
         <div className="min-h-screen bg-white">
 
-            {/* Hero Section */}
-            <section className="relative h-screen bg-gradient-to-br from-emerald-900 via-teal-800 to-blue-900 overflow-hidden">
-                {/* Background Image */}
-                <div
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
-                    style={{
-                        backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop')"
-                    }}
-                ></div>
+            {/* Enhanced Hero Section with Image Slideshow */}
+            <section className="relative h-screen overflow-hidden">
+                {/* Image Slideshow Background */}
+                <div className="absolute inset-0">
+                    {heroImages.map((image, index) => (
+                        <div
+                            key={index}
+                            className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ${
+                                index === currentImageIndex 
+                                    ? 'opacity-100 scale-100' 
+                                    : 'opacity-0 scale-105'
+                            }`}
+                            style={{ backgroundImage: `url('${image}')` }}
+                        />
+                    ))}
+                </div>
 
-                {/* Floating Elements */}
-                <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
-                <div className="absolute bottom-20 right-10 w-40 h-40 bg-emerald-300/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/80 via-teal-800/70 to-blue-900/80"></div>
 
-                <div className="relative z-10 flex items-center justify-center h-full">
-                    <div className="text-center text-white px-4 max-w-4xl">
-                        <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-emerald-200 bg-clip-text text-transparent">
-                            Discover
-                            <span className="block bg-gradient-to-r from-emerald-300 to-teal-300 bg-clip-text text-transparent">
-                                Gilgit-Baltistan
-                            </span>
-                        </h1>
-                        <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto leading-relaxed">
+                {/* Animated Pattern Overlay */}
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute inset-0" style={{
+                        backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+                        backgroundSize: '40px 40px'
+                    }}></div>
+                </div>
+
+                {/* Floating Orbs */}
+                <div className="absolute top-1/4 left-10 w-24 h-24 md:w-40 md:h-40 bg-emerald-400/20 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute top-1/3 right-20 w-32 h-32 md:w-52 md:h-52 bg-blue-400/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                <div className="absolute bottom-1/4 left-1/4 w-28 h-28 md:w-44 md:h-44 bg-teal-400/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+
+                {/* Content Container */}
+                <div className="relative z-10 flex items-center justify-center h-full px-4 sm:px-6 lg:px-8">
+                    <div className="text-center text-white max-w-5xl w-full">
+                        {/* Main Heading */}
+                        <div className="mb-6 space-y-2">
+                            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight">
+                                <span className="block bg-gradient-to-r from-white via-emerald-100 to-white bg-clip-text text-transparent animate-pulse">
+                                    Discover
+                                </span>
+                                <span className="block mt-2 bg-gradient-to-r from-emerald-300 via-teal-300 to-emerald-400 bg-clip-text text-transparent">
+                                    Gilgit-Baltistan
+                                </span>
+                            </h1>
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-8 md:mb-12 text-gray-100 max-w-3xl mx-auto leading-relaxed font-light px-4">
                             Experience the majestic beauty of Pakistan's northern paradise. Explore pristine valleys,
                             taste authentic local products, and create unforgettable memories.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <button className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2" onClick={() => navigate('/cities')}>
-                                <span>Start Exploring</span>
-                                <ChevronRight className="h-5 w-5" />
-                            </button>
+
+                        {/* CTA Buttons */}
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
                             <button 
-                             onClick={() => navigate('/gallery')}
-                            className="border-2 border-white/30 backdrop-blur-sm text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white/10 transition-all duration-300 flex items-center space-x-2">
-                                <Camera className="h-5 w-5" />
-                                <span>View Gallery</span>
+                                className="group relative w-full sm:w-auto bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-white px-8 py-4 rounded-full text-base md:text-lg font-semibold overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/50 hover:scale-105"
+                                onClick={() => navigate('/cities')}
+                            >
+                                <span className="relative z-10 flex items-center justify-center space-x-2">
+                                    <span>Start Exploring</span>
+                                    <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </button>
+                            
+                            <button 
+                                onClick={() => navigate('/gallery')}
+                                className="group w-full sm:w-auto backdrop-blur-md bg-white/10 border-2 border-white/30 text-white px-8 py-4 rounded-full text-base md:text-lg font-semibold hover:bg-white/20 hover:border-white/50 transition-all duration-300 hover:scale-105"
+                            >
+                                <span className="flex items-center justify-center space-x-2">
+                                    <Camera className="h-5 w-5 group-hover:rotate-12 transition-transform" />
+                                    <span>View Gallery</span>
+                                </span>
+                            </button>
+                        </div>
+
+                        {/* Image Progress Indicators */}
+                        <div className="flex justify-center mt-10 md:mt-16 space-x-2">
+                            {heroImages.map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setCurrentImageIndex(index)}
+                                    className={`h-1 rounded-full transition-all duration-300 ${
+                                        index === currentImageIndex 
+                                            ? 'w-12 bg-white' 
+                                            : 'w-6 bg-white/40 hover:bg-white/60'
+                                    }`}
+                                    aria-label={`Go to slide ${index + 1}`}
+                                />
+                            ))}
                         </div>
                     </div>
                 </div>
 
                 {/* Scroll Indicator */}
-                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-                    <div className="w-1 h-16 bg-gradient-to-b from-white/50 to-transparent rounded-full"></div>
+                <div className="absolute bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+                    <div className="flex flex-col items-center space-y-2">
+                        <div className="w-6 h-10 border-2 border-white/50 rounded-full flex items-start justify-center p-2">
+                            <div className="w-1 h-2 bg-white rounded-full animate-pulse"></div>
+                        </div>
+                        <span className="text-white/70 text-xs uppercase tracking-wider">Scroll</span>
+                    </div>
                 </div>
             </section>
 
             {/* Cities Section */}
-            <section className="py-20 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section className="py-24 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
+                {/* Decorative Background Elements */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-20"></div>
+                <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-100 rounded-full blur-3xl opacity-20"></div>
+                
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                        <div className="inline-block mb-4">
+                            <span className="text-emerald-600 font-semibold text-sm uppercase tracking-wider bg-emerald-50 px-4 py-2 rounded-full">
+                                Popular Destinations
+                            </span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
                             Explore{" "}
-                            <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                            <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent">
                                 Cities
                             </span>
                         </h2>
-                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                        <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
                             Discover the breathtaking cities of Gilgit-Baltistan, each offering unique experiences and natural wonders.
                         </p>
                     </div>
@@ -270,7 +355,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* ✅ Products Slider Section - REPLACED WITH NEW COMPONENT */}
+            {/* Products Slider Section */}
             <ProductSliderSection onProductClick={handleProductDetails} />
 
             {/* Gallery Section */}
@@ -283,27 +368,11 @@ const Home = () => {
                         <p className="text-xl text-gray-300 max-w-2xl mx-auto">
                             Capture the breathtaking beauty of Gilgit-Baltistan through our curated collection of stunning photographs.
                         </p>
-<GalleryPreview maxItems={12} />
+                        <GalleryPreview maxItems={12} />
                     </div>
-                    {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-                        {galleryImages.map((image, index) => (
-                            <div key={index} className="group relative overflow-hidden rounded-xl aspect-square">
-                                <img
-                                    src={image}
-                                    alt={`Gallery ${index + 1}`}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <div className="absolute bottom-4 left-4 text-white">
-                                        <Camera className="h-6 w-6" />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div> */}
 
                     <div className="text-center">
-                        <button  onClick={() => navigate('/gallery')} className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center space-x-2 mx-auto">
+                        <button onClick={() => navigate('/gallery')} className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center space-x-2 mx-auto">
                             <Camera className="h-5 w-5" />
                             <span>View Full Gallery</span>
                         </button>
