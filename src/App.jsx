@@ -29,6 +29,11 @@ import {
 import Gallery from "./components/Gallery";
 
 import { Footer, Header } from './components';
+import ChatbotPage from "./pages/ChatbotPage";
+import ChatbotWidget from "./components/ChatbotWidget";
+
+
+
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -64,12 +69,14 @@ const AppWrapper = () => {
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/chatbot" element={<ChatbotPage />} />
 
         {/* Protected Routes */}
         <Route path="/profile" element={<AuthLayout><ProfilePage /></AuthLayout>} />
         <Route path="/cart" element={<AuthLayout><CartPage /></AuthLayout>} />
         <Route path="/checkout" element={<AuthLayout><CheckoutPage /></AuthLayout>} />
       </Routes>
+       <ChatbotWidget />
 
       {!shouldHideLayout && <Footer />}
     </div>

@@ -119,6 +119,9 @@ const Header = () => {
               <Link to="/gallery" className="font-medium text-gray-700 hover:text-emerald-600 transition-colors">
                 Gallery
               </Link>
+              {/* <Link to="/chatbot" className="font-medium text-gray-700 hover:text-emerald-600 transition-colors">
+                chatbot
+              </Link> */}
             </nav>
 
             {/* Desktop Auth Buttons / Profile / Cart */}

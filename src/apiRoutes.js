@@ -44,7 +44,11 @@ const API_ROUTES = {
   // Order Management - New endpoints for cancel/delete
   ORDER_CANCEL: (id) => `/ecommerce/orders/${id}/cancel/`,
   ORDER_DELETE: (id) => `/ecommerce/orders/${id}/`,
-  PRODUCT_REVIEWS: (id) => `/products/${id}/reviews/`
+  PRODUCT_REVIEWS: (id) => `/products/${id}/reviews/`,
+
+
+  CHATBOT: "/chatbot/chat/",
+
 };
 
 export default API_ROUTES;
