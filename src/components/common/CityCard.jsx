@@ -6,7 +6,7 @@ let cityName = city?.name?.trim()
   return (
     <div
       onClick={() => onClick(cityName)}
-      className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col"
+      className="group bg-white  rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col"
       style={{ height: "100%" }} // Ensure full stretch
     >
       {/* City Image */}
@@ -69,7 +69,7 @@ let cityName = city?.name?.trim()
         {/* Push Explore Button to bottom */}
         <div className="mt-auto">
           <button 
-          className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 group-hover:from-emerald-700 group-hover:to-teal-700"
+          className="w-full bg-gradient-to-r cursor-pointer  from-emerald-600 to-teal-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 group-hover:from-emerald-700 group-hover:to-teal-700"
           >
             <span>Explore {city.name}</span>
             <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />

@@ -176,7 +176,7 @@ const Header = () => {
                           navigate("/profile");
                           setShowProfileDropdown(false);
                         }}
-                        className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 w-full text-left transition-colors"
+                        className="flex items-center cursor-pointer  space-x-2 px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 w-full text-left transition-colors"
                       >
                         <User className="h-4 w-4" />
                         <span>My Profile</span>
@@ -196,7 +196,7 @@ const Header = () => {
                       <hr className="my-2" />
                       <button
                         onClick={handleLogout}
-                        className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 w-full text-left transition-colors"
+                        className="flex items-center cursor-pointer  space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 w-full text-left transition-colors"
                       >
                         <svg
                           className="h-4 w-4"
@@ -215,13 +215,13 @@ const Header = () => {
                 <>
                   <button
                     onClick={() => navigate("/login")}
-                    className="text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+                    className="text-emerald-600 cursor-pointer  hover:text-emerald-700 font-medium transition-colors"
                   >
                     Login
                   </button>
                   <button
                     onClick={() => navigate("/signup")}
-                    className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-2 rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                    className="bg-gradient-to-r cursor-pointer  from-emerald-600 to-teal-600 text-white px-6 py-2 rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                   >
                     Sign Up
                   </button>

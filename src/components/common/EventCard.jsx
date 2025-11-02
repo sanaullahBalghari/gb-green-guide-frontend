@@ -10,7 +10,7 @@ const EventCard = ({
   formatDate,
 }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+    <div className="bg-white  cursor-pointer  rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
       <div className="relative h-48 overflow-hidden">
         <img
           src={event.image}
@@ -52,7 +52,7 @@ const EventCard = ({
           {event.description?.length > 100 && (
             <button
               onClick={onToggle}
-              className="mt-2 text-emerald-600 hover:text-emerald-700 text-sm font-medium flex items-center gap-1 transition-colors"
+              className="mt-2 text-emerald-600 cursor-pointer  hover:text-emerald-700 text-sm font-medium flex items-center gap-1 transition-colors"
             >
               {expanded ? (
                 <>

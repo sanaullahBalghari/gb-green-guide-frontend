@@ -18,7 +18,7 @@ const RestaurantCard = ({ restaurant, showActions = false, onEdit, onDelete, onV
   const hasRooms = restaurant.roomsAvailable || restaurant.room_available;
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105">
+    <div className="bg-white  cursor-pointer  rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105">
       <div className="relative h-56">
         <img
           src={imageSrc}
@@ -72,7 +72,7 @@ const RestaurantCard = ({ restaurant, showActions = false, onEdit, onDelete, onV
           {!showActions ? (
             <button
               onClick={() => onViewDetails(restaurant)}
-              className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 px-4 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200 font-semibold"
+              className="flex-1  cursor-pointer  bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 px-4 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200 font-semibold"
             >
               View Details
             </button>

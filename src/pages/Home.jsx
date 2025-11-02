@@ -72,9 +72,19 @@ const Home = () => {
         }));
     };
 
+
     const handleRestaurantDetails = (restaurant) => {
-        navigate(`/restaurants/${restaurant.id}`);
-    };
+  // ✅ Pass the original restaurant object, not the transformed one
+  navigate(`/restaurants/${restaurant.id}`, {
+    state: { 
+      restaurant: restaurant,  // Pass original backend data
+      from: '/'  // Track where we came from
+    }
+  });
+};
+    // const handleRestaurantDetails = (restaurant) => {
+    //     navigate(`/restaurants/${restaurant.id}`);
+    // };
 
     const handleProductDetails = (product) => {
         navigate(`/products/${product.id}`);
@@ -237,7 +247,7 @@ const Home = () => {
                     <div className="text-center pt-7">
                         <button
                             onClick={() => navigate('/cities')}
-                            className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                            className="bg-gradient-to-r cursor-pointer from-emerald-600 to-teal-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                         >
                             View All Cities
                         </button>
@@ -291,7 +301,7 @@ const Home = () => {
                     <div className="text-center">
                         <button
                             onClick={() => navigate('/events')}
-                            className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                            className="bg-gradient-to-r cursor-pointer from-emerald-600 to-teal-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                         >
                             View All Events
                         </button>
@@ -324,22 +334,41 @@ const Home = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                             {randomRestaurants.map((restaurant) => (
                                 <RestaurantCard
-                                    key={restaurant.id}
-                                    restaurant={{
-                                        id: restaurant.id,
-                                        name: restaurant.name,
-                                        type: restaurant.restaurant_type,
-                                        location: restaurant.location_inside_city,
-                                        status: restaurant.is_active ? "Active" : "Not Active",
-                                        room_available: restaurant.room_available,
-                                        description: restaurant.description,
-                                        images: restaurant.image ? [restaurant.image] : [
-                                            "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop"
-                                        ]
-                                    }}
-                                    showActions={false}
-                                    onViewDetails={handleRestaurantDetails}
-                                />
+  key={restaurant.id}
+  restaurant={{
+    // Keep these transformations ONLY for display in the card
+    id: restaurant.id,
+    name: restaurant.name,
+    type: restaurant.restaurant_type,
+    location: restaurant.location_inside_city,
+    status: restaurant.is_active ? "Active" : "Not Active",
+    room_available: restaurant.room_available,
+    roomsAvailable: restaurant.room_available,
+    description: restaurant.description,
+    images: restaurant.image ? [restaurant.image] : [
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop"
+    ]
+  }}
+  showActions={false}
+  onViewDetails={() => handleRestaurantDetails(restaurant)}  // ✅ Pass original restaurant
+/>
+                                // <RestaurantCard
+                                //     key={restaurant.id}
+                                //     restaurant={{
+                                //         id: restaurant.id,
+                                //         name: restaurant.name,
+                                //         type: restaurant.restaurant_type,
+                                //         location: restaurant.location_inside_city,
+                                //         status: restaurant.is_active ? "Active" : "Not Active",
+                                //         room_available: restaurant.room_available,
+                                //         description: restaurant.description,
+                                //         images: restaurant.image ? [restaurant.image] : [
+                                //             "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop"
+                                //         ]
+                                //     }}
+                                //     showActions={false}
+                                //     onViewDetails={handleRestaurantDetails}
+                                // />
                             ))}
                         </div>
                     )}
@@ -347,7 +376,7 @@ const Home = () => {
                     <div className="text-center">
                         <button
                             onClick={() => navigate('/restaurant')}
-                            className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                            className="bg-gradient-to-r cursor-pointer from-emerald-600 to-teal-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                         >
                             View All Restaurants
                         </button>

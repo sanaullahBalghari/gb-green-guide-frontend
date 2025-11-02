@@ -320,7 +320,7 @@ const ProductListPage = ({ isOwnerProfile = false }) => {
     }
 
     return (
-      <div className="flex items-center justify-center space-x-1 mt-8">
+      <div className="flex items-center justify-center  space-x-1 mt-8">
         <button
           onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
           disabled={currentPage === 1}
@@ -421,16 +421,16 @@ const ProductListPage = ({ isOwnerProfile = false }) => {
 
       {/* Availability Filter */}
       <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Availability</h3>
-        <div className="space-y-2">
-          <label className="flex items-center">
+        <h3 className="font-semibold  text-gray-900 mb-3">Availability</h3>
+        <div className="space-y-2 cursor-pointer ">
+          <label className="flex items-center ">
             <input
               type="radio"
               name="availability"
               value=""
               checked={!filters.is_available}
               onChange={() => handleFilterChange('is_available', '')}
-              className="mr-2 text-emerald-600"
+              className="mr-2 text-emerald-600 "
             />
             All Products
           </label>

@@ -29,7 +29,7 @@ const ProductCard = ({ product, showActions = false, onEdit, onDelete, onViewDet
     const stockStatus = getStockStatus();
 
     return (
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105">
+        <div className="bg-white rounded-2xl cursor-pointer  shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105">
             <div className="relative h-56">
                 <img
                     src={imageSrc}
