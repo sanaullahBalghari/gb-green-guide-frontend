@@ -148,69 +148,150 @@ const Header = () => {
 
               {isAuthenticated ? (
                 <div className="relative">
-                  <button
-                    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                    className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                      {user?.username?.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="font-medium text-gray-700">
-                      {user?.username || "My Account"}
-                    </span>
-                    <svg
-                      className="w-4 h-4 text-gray-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
+  <button
+    onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+    className="flex items-center cursor-pointer space-x-2 p-2 rounded-full hover:bg-gray-100 transition-colors"
+  >
+    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+      {user?.username?.charAt(0).toUpperCase()}
+    </div>
+    <span className="font-medium text-gray-700">
+      {user?.username || "My Account"}
+    </span>
+    <svg
+      className="w-4 h-4 text-gray-500"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M19 9l-7 7-7-7"
+      />
+    </svg>
+  </button>
 
-                  {/* Desktop Profile Dropdown */}
-                  {showProfileDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                      <button
-                        onClick={() => {
-                          navigate("/profile");
-                          setShowProfileDropdown(false);
-                        }}
-                        className="flex items-center cursor-pointer  space-x-2 px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 w-full text-left transition-colors"
-                      >
-                        <User className="h-4 w-4" />
-                        <span>My Profile</span>
-                      </button>
-                      {shouldShowCart() && (
-                        <button
-                          onClick={() => {
-                            handleCartClick();
-                            setShowProfileDropdown(false);
-                          }}
-                          className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 w-full text-left transition-colors"
-                        >
-                          <ShoppingCart className="h-4 w-4" />
-                          <span>My Cart ({cartItemCount})</span>
-                        </button>
-                      )}
-                      <hr className="my-2" />
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center cursor-pointer  space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 w-full text-left transition-colors"
-                      >
-                        <svg
-                          className="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H3" />
-                        </svg>
-                        <span>Logout</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
+  {/* Desktop Profile Dropdown */}
+  {showProfileDropdown && (
+    <div
+      className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
+      onMouseLeave={() => setShowProfileDropdown(false)} // 👈 auto-close on mouse leave
+    >
+      <button
+        onClick={() => {
+          navigate("/profile");
+          setShowProfileDropdown(false);
+        }}
+        className="flex items-center cursor-pointer  space-x-2 px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 w-full text-left transition-colors"
+      >
+        <User className="h-4 w-4" />
+        <span>My Profile</span>
+      </button>
+
+      {shouldShowCart() && (
+        <button
+          onClick={() => {
+            handleCartClick();
+            setShowProfileDropdown(false);
+          }}
+          className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 w-full text-left transition-colors"
+        >
+          <ShoppingCart className="h-4 w-4" />
+          <span>My Cart ({cartItemCount})</span>
+        </button>
+      )}
+
+      <hr className="my-2" />
+
+      <button
+        onClick={handleLogout}
+        className="flex items-center cursor-pointer  space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 w-full text-left transition-colors"
+      >
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M17 16l4-4m0 0l-4-4m4 4H3"
+          />
+        </svg>
+        <span>Logout</span>
+      </button>
+    </div>
+  )}
+</div>
+
+                // <div className="relative">
+                //   <button
+                //     onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                //     className="flex items-center cursor-pointer space-x-2 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                //   >
+                //     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                //       {user?.username?.charAt(0).toUpperCase()}
+                //     </div>
+                //     <span className="font-medium text-gray-700">
+                //       {user?.username || "My Account"}
+                //     </span>
+                //     <svg
+                //       className="w-4 h-4 text-gray-500"
+                //       fill="none"
+                //       stroke="currentColor"
+                //       viewBox="0 0 24 24"
+                //     >
+                //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                //     </svg>
+                //   </button>
+
+                //   {/* Desktop Profile Dropdown */}
+                //   {showProfileDropdown && (
+                //     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+                //       <button
+                //         onClick={() => {
+                //           navigate("/profile");
+                //           setShowProfileDropdown(false);
+                //         }}
+                //         className="flex items-center cursor-pointer  space-x-2 px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 w-full text-left transition-colors"
+                //       >
+                //         <User className="h-4 w-4" />
+                //         <span>My Profile</span>
+                //       </button>
+                //       {shouldShowCart() && (
+                //         <button
+                //           onClick={() => {
+                //             handleCartClick();
+                //             setShowProfileDropdown(false);
+                //           }}
+                //           className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 w-full text-left transition-colors"
+                //         >
+                //           <ShoppingCart className="h-4 w-4" />
+                //           <span>My Cart ({cartItemCount})</span>
+                //         </button>
+                //       )}
+                //       <hr className="my-2" />
+                //       <button
+                //         onClick={handleLogout}
+                //         className="flex items-center cursor-pointer  space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 w-full text-left transition-colors"
+                //       >
+                //         <svg
+                //           className="h-4 w-4"
+                //           fill="none"
+                //           stroke="currentColor"
+                //           viewBox="0 0 24 24"
+                //         >
+                //           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H3" />
+                //         </svg>
+                //         <span>Logout</span>
+                //       </button>
+                //     </div>
+                //   )}
+                // </div>
               ) : (
                 <>
                   <button

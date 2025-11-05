@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Phone, Mail, Star, Clock, Wifi, Car, Users, Calendar, MessageCircle, Navigation, Bed, Shield, Award, MapPin } from 'lucide-react';
+import { ChevronLeft, Phone, Mail, Star, Clock, Wifi, Car, DollarSign,Users, Calendar, MessageCircle, Navigation, Bed, Shield, Award, MapPin } from 'lucide-react';
 import { BookingForm } from '../components';
 import useRestaurants from '../hooks/useRestaurants';
 import Loader from '../components/common/Loader';
@@ -154,6 +154,21 @@ const RestaurantDetailPage = ({ restaurant: selectedRestaurantProp, onBack }) =>
                     </div>
                     <div className="text-sm text-slate-600">Room Status</div>
                   </div>
+
+
+                   {/* Average Room Rent - NEW */}
+    {restaurant.room_available && restaurant.average_room_rent && (
+      <div className="bg-gradient-to-br from-violet-50 to-purple-50 p-4 rounded-xl text-center border border-violet-100">
+        <div className="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-2">
+          {/* <span className="text-violet-600 font-bold text-sm">₨</span> */}
+            <DollarSign className="w-4 h-4 text-violet-600" />
+        </div>
+        <div className="text-lg font-bold text-violet-600 mb-1">
+          ₨{Number(restaurant.average_room_rent).toLocaleString()}
+        </div>
+        <div className="text-sm text-slate-600">Avg. Room Rent</div>
+      </div>
+    )}
 
                   {/* Restaurant Type */}
                   <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl text-center border border-blue-100">

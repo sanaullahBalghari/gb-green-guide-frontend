@@ -57,11 +57,12 @@ const ChatbotWidget = () => {
         { showNotification: false }
       );
 
-      const botMsg = {
-        sender: "bot",
-        text: res?.reply || "🤖 Sorry, I didn't quite catch that.",
-      };
-      setMessages((prev) => [...prev, botMsg]);
+    const botMsg = {
+  sender: "bot",
+  text: res?.html || res?.reply || "🤖 Sorry, I didn't quite catch that.",
+};
+setMessages((prev) => [...prev, botMsg]);
+
     } catch (error) {
       const errMsg = {
         sender: "bot",
@@ -95,7 +96,7 @@ const ChatbotWidget = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-18 right-6 bg-gradient-to-r from-green-600 to-green-700 text-white p-4 rounded-full shadow-2xl hover:shadow-green-500/50 hover:scale-110 transition-all duration-300 z-50 group animate-bounce"
+          className="fixed bottom-18 right-6 cursor-pointer bg-gradient-to-r from-green-600 to-green-700 text-white p-4 rounded-full shadow-2xl hover:shadow-green-500/50 hover:scale-110 transition-all duration-300 z-50 group animate-bounce"
           aria-label="Open chat"
         >
           <MessageCircle size={28} className="group-hover:animate-pulse" />
@@ -105,7 +106,7 @@ const ChatbotWidget = () => {
 
       {/* Chat Window - Small (Corner Widget) */}
       {isOpen && !isFullscreen && (
-        <div className="fixed bottom-12 right-6 w-[360px] sm:w-[400px] bg-white shadow-2xl rounded-3xl flex flex-col border border-green-100/50 z-50 animate-slideIn max-h-[600px]">
+        <div className="fixed bottom-6 right-6 w-[360px] sm:w-[400px] bg-white shadow-2xl rounded-3xl flex flex-col border border-green-100/50 z-50 animate-slideIn max-h-[600px]">
           {/* Header */}
           <div className="bg-gradient-to-r from-green-600 via-green-500 to-emerald-600 text-white flex justify-between items-center px-5 py-4 rounded-t-3xl relative overflow-hidden">
             <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
@@ -124,14 +125,14 @@ const ChatbotWidget = () => {
             <div className="relative flex items-center gap-2">
               <button
                 onClick={toggleFullscreen}
-                className="hover:bg-white/20 p-1.5 rounded-lg transition-colors"
+                className="hover:bg-white/20 p-1.5 cursor-pointer rounded-lg transition-colors"
                 aria-label="Expand fullscreen"
               >
                 <Maximize2 size={18} />
               </button>
               <button
                 onClick={closeWidget}
-                className="hover:bg-white/20 p-1.5 rounded-lg transition-colors"
+                className="hover:bg-white/20 p-1.5 cursor-pointer rounded-lg transition-colors"
                 aria-label="Close chat"
               >
                 <X size={18} />

@@ -47,6 +47,7 @@ const API_ROUTES = {
   PRODUCT_REVIEWS: (id) => `/products/${id}/reviews/`,
 
 
+
   CHATBOT: "/chatbot/chat/",
 
 };

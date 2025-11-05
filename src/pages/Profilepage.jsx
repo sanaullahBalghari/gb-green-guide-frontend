@@ -131,7 +131,7 @@ const ProfilePage = () => {
     } finally {
       setProductsLoading(false);
     }
-  };
+  }
 
   const handleDelete = async (type, id) => {
     if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
