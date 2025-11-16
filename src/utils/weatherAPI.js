@@ -7,10 +7,12 @@ const WEATHER_BASE_URL = 'https://api.weatherapi.com/v1';
 const CITY_WEATHER_MAPPING = {
   'khaplu': ['Khapalu', 'ganche'],
   'gilgit': ['gilgit city'],
-  'hunza': ['karimabad', 'hunza valley'],
-  'skardu': ['skardhoo', 'skardu city'],
+  'hunza': ['hunza','karimabad', 'hunza valley'],
+  'skardu': ['skardhoo','skardu', 'skardu city'],
   'gailgit': ['gilgit'],  // Common misspelling
   'diamir': ['chilas'],   // District to main city
+  'Ghizer': ['chilas','Chilas'],   // District to main city
+  'Astore': ['hunza','Chilas'],   // District to main city
   'ghanche': ['khapalu', 'ganche'],
   // Add more mappings here as needed
 };

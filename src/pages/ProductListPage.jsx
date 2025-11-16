@@ -144,7 +144,8 @@ const ProductListPage = ({ isOwnerProfile = false }) => {
 
       // ✅ PAGINATION FIX: Remove page_size to use backend default (5)
       const queryParams = {
-        page: currentPage
+        page: currentPage,
+        page_size: ITEMS_PER_PAGE 
       };
 
       console.log("🛒 Fetching default products:", { endpoint, queryParams, isOwnerProfile });
@@ -324,9 +325,9 @@ const ProductListPage = ({ isOwnerProfile = false }) => {
         <button
           onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
           disabled={currentPage === 1}
-          className="px-3 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-2 rounded-lg border cursor-pointer border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-4 h-4 cursor-pointer" />
         </button>
 
         {pages.map(page => (
@@ -335,7 +336,7 @@ const ProductListPage = ({ isOwnerProfile = false }) => {
             onClick={() => setCurrentPage(page)}
             className={`px-4 py-2 rounded-lg font-medium ${currentPage === page
               ? 'bg-emerald-600 text-white'
-              : 'border border-gray-300 text-gray-600 hover:bg-gray-50'
+              : 'border border-gray-300 text-gray-600 cursor-pointer hover:bg-gray-50'
               }`}
           >
             {page}
@@ -345,9 +346,9 @@ const ProductListPage = ({ isOwnerProfile = false }) => {
         <button
           onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
           disabled={currentPage === totalPages}
-          className="px-3 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-2 rounded-lg border border-gray-300 cursor-pointer text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-4 h-4 cursor-pointer" />
         </button>
       </div>
     );
@@ -480,7 +481,7 @@ const ProductListPage = ({ isOwnerProfile = false }) => {
       </div>
 
       {/* City Filter */}
-      <div>
+      {/* <div>
         <h3 className="font-semibold text-gray-900 mb-3">Location</h3>
         <select
           value={filters.city}
@@ -492,7 +493,7 @@ const ProductListPage = ({ isOwnerProfile = false }) => {
             <option key={city.id} value={city.id}>{city.name}</option>
           ))}
         </select>
-      </div>
+      </div> */}
     </div>
   );
 

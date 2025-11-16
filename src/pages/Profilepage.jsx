@@ -115,7 +115,7 @@ const ProfilePage = () => {
       const response = await apiServer(
         'get',
         API_ROUTES.MY_PRODUCTS,
-        {},
+        { all: 'true' },
         {
           tokenRequired: true,
           showNotification: false,
@@ -141,7 +141,7 @@ const ProfilePage = () => {
         await apiServer(
           'delete',
           `${API_ROUTES.RESTAURANTS}${id}/`,
-          {},
+          { all: 'true' },
           {
             tokenRequired: true,
             showNotification: true,
